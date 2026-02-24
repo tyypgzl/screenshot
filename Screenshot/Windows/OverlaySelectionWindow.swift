@@ -1264,9 +1264,13 @@ private extension SelectionOverlayView {
     func compositeImage() -> NSImage? {
         guard let base = baseImage, let sel = selectedRect, let screen = screen else { return nil }
 
-        let scale = screen.backingScaleFactor
-        let pixelW = Int(sel.width * scale)
-        let pixelH = Int(sel.height * scale)
+        // Use actual base image resolution to match capture quality
+        let baseCG = base.cgImage(forProposedRect: nil, context: nil, hints: nil)
+        let scaleX = baseCG.map { CGFloat($0.width) / sel.width } ?? screen.backingScaleFactor
+        let scaleY = baseCG.map { CGFloat($0.height) / sel.height } ?? screen.backingScaleFactor
+        let scale = max(scaleX, scaleY)
+        let pixelW = Int(sel.width * scaleX)
+        let pixelH = Int(sel.height * scaleY)
 
         guard let bitmapRep = NSBitmapImageRep(
             bitmapDataPlanes: nil,

@@ -15,11 +15,17 @@ final class CaptureManager {
 
     private let ciContext = CIContext()
 
+    /// Returns native pixel dimensions for a display using CGDisplayMode.
+    /// SCDisplay.width/height are in points — this gives actual hardware pixels.
+    private func nativePixelSize(for displayID: CGDirectDisplayID) -> (width: Int, height: Int)? {
+        guard let mode = CGDisplayCopyDisplayMode(displayID) else { return nil }
+        return (mode.pixelWidth, mode.pixelHeight)
+    }
+
     // Captures a single full-screen frame using ScreenCaptureKit and returns an NSImage.
     func captureFullScreen() async -> NSImage? {
         do {
             let content = try await SCShareableContent.current
-            // Prefer the main display; fallback to first available.
             let mainDisplayID =
                 NSScreen.main?.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")]
                 as? CGDirectDisplayID
@@ -29,23 +35,18 @@ final class CaptureManager {
 
             let filter = SCContentFilter(display: display, excludingWindows: [])
             let config = SCStreamConfiguration()
-            config.width = display.width
-            config.height = display.height
+            let px = nativePixelSize(for: display.displayID)
+            config.width = px?.width ?? display.width * 2
+            config.height = px?.height ?? display.height * 2
             config.showsCursor = false
             config.capturesAudio = false
 
             let stream = SCStream(filter: filter, configuration: config, delegate: nil)
-
-            // Adapter to receive a single frame
             let collector = OneFrameCollector(ciContext: ciContext)
             try stream.addStreamOutput(
                 collector, type: .screen, sampleHandlerQueue: collector.queue)
             try await stream.startCapture()
-
-            // Wait for the first frame
             let image = try await collector.nextImage()
-
-            // Stop capture and clean up
             try await stream.stopCapture()
             try? stream.removeStreamOutput(collector, type: .screen)
 
@@ -69,8 +70,9 @@ final class CaptureManager {
             let excludeWindows = content.windows.filter { excludeSet.contains($0.windowID) }
             let filter = SCContentFilter(display: display, excludingWindows: excludeWindows)
             let config = SCStreamConfiguration()
-            config.width = display.width
-            config.height = display.height
+            let px = nativePixelSize(for: display.displayID)
+            config.width = px?.width ?? display.width * 2
+            config.height = px?.height ?? display.height * 2
             config.showsCursor = false
             config.capturesAudio = false
 
@@ -125,16 +127,20 @@ private final class OneFrameCollector: NSObject, SCStreamOutput {
 private extension CaptureManager {
     func crop(image: NSImage, to rectPoints: CGRect, on screen: NSScreen) -> NSImage? {
         guard let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
-        let scale = screen.backingScaleFactor
-        let pixelW = Int(rectPoints.width * scale)
-        let pixelH = Int(rectPoints.height * scale)
-        let px = Int(rectPoints.origin.x * scale)
-        let py = Int(rectPoints.origin.y * scale)
+        // Compute actual scale from captured image vs screen points.
+        // backingScaleFactor can be wrong when displays use non-native scaled modes
+        // (e.g. 4K at "Looks like 2560x1440" → scale=2 but 2560*2=5120 ≠ 3840 real pixels).
+        let screenPtSize = screen.frame.size
+        let scaleX = CGFloat(cg.width) / screenPtSize.width
+        let scaleY = CGFloat(cg.height) / screenPtSize.height
+        let pixelW = Int(rectPoints.width * scaleX)
+        let pixelH = Int(rectPoints.height * scaleY)
+        let px = Int(rectPoints.origin.x * scaleX)
+        let py = Int(rectPoints.origin.y * scaleY)
         let imgH = cg.height
         // Flip Y for CGImage coordinates
         let cropRect = CGRect(x: px, y: imgH - py - pixelH, width: pixelW, height: pixelH)
         guard let cropped = cg.cropping(to: cropRect) else { return nil }
-        // Size in points should match selection rect size for correct on-screen placement
         return NSImage(cgImage: cropped, size: rectPoints.size)
     }
 }
