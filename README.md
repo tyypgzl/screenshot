@@ -1,6 +1,6 @@
 # Screenshot
 
-A lightweight, fast macOS menu bar app for capturing screenshots and annotating them — built with Swift, AppKit, and ScreenCaptureKit.
+A lightweight (~2MB), fast macOS menu bar app for capturing screenshots and annotating them — built with native Swift, AppKit, and ScreenCaptureKit. No Electron, no bloat.
 
 Signed with Developer ID and notarized by Apple — no Gatekeeper warnings.
 
