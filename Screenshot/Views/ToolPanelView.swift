@@ -66,13 +66,13 @@ final class ToolBarButton: NSButton {
 
     fileprivate func updateVisualState() {
         if isToolSelected {
-            contentTintColor = .white
-            layer?.backgroundColor = NSColor.controlAccentColor.withAlphaComponent(0.6).cgColor
+            contentTintColor = .labelColor
+            layer?.backgroundColor = NSColor.controlAccentColor.withAlphaComponent(0.2).cgColor
         } else if isHovered {
-            contentTintColor = .white
-            layer?.backgroundColor = NSColor.white.withAlphaComponent(0.14).cgColor
+            contentTintColor = .labelColor
+            layer?.backgroundColor = NSColor.labelColor.withAlphaComponent(0.08).cgColor
         } else {
-            contentTintColor = NSColor(white: 0.8, alpha: 1)
+            contentTintColor = .secondaryLabelColor
             layer?.backgroundColor = NSColor.clear.cgColor
         }
     }
@@ -118,12 +118,12 @@ private final class ColorSwatchButton: NSButton {
         path.fill()
 
         if isColorSelected {
-            NSColor.white.setStroke()
+            NSColor.labelColor.setStroke()
             let ring = NSBezierPath(roundedRect: dotRect.insetBy(dx: -1, dy: -1), xRadius: r + 1, yRadius: r + 1)
             ring.lineWidth = 2
             ring.stroke()
         } else if isHovered {
-            NSColor.white.withAlphaComponent(0.6).setStroke()
+            NSColor.secondaryLabelColor.setStroke()
             let ring = NSBezierPath(roundedRect: dotRect, xRadius: r, yRadius: r)
             ring.lineWidth = 1.5
             ring.stroke()
@@ -165,7 +165,7 @@ private final class ColorIndicatorButton: NSButton {
     override func draw(_ dirtyRect: NSRect) {
         // Background on hover
         if isHovered {
-            NSColor.white.withAlphaComponent(0.14).setFill()
+            NSColor.labelColor.withAlphaComponent(0.08).setFill()
             NSBezierPath(roundedRect: bounds, xRadius: Panel.cornerR, yRadius: Panel.cornerR).fill()
         }
         // Color circle in center
@@ -178,7 +178,7 @@ private final class ColorIndicatorButton: NSButton {
         currentColor.setFill()
         NSBezierPath(ovalIn: circleRect).fill()
         // Thin border so white color is visible
-        NSColor.white.withAlphaComponent(0.4).setStroke()
+        NSColor.tertiaryLabelColor.setStroke()
         let ring = NSBezierPath(ovalIn: circleRect)
         ring.lineWidth = 1
         ring.stroke()
@@ -293,7 +293,7 @@ private final class ColorPopoverView: NSView {
 private func makeSeparator() -> NSView {
     let v = NSView()
     v.wantsLayer = true
-    v.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.12).cgColor
+    v.layer?.backgroundColor = NSColor.separatorColor.cgColor
     v.translatesAutoresizingMaskIntoConstraints = false
     NSLayoutConstraint.activate([
         v.widthAnchor.constraint(equalToConstant: 1),
@@ -305,7 +305,7 @@ private func makeSeparator() -> NSView {
 private func makeHSeparator() -> NSView {
     let v = NSView()
     v.wantsLayer = true
-    v.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.12).cgColor
+    v.layer?.backgroundColor = NSColor.separatorColor.cgColor
     v.translatesAutoresizingMaskIntoConstraints = false
     v.heightAnchor.constraint(equalToConstant: 1).isActive = true
     return v
@@ -343,14 +343,14 @@ private func makeSquareBtn(symbol: String, tooltip: String, target: AnyObject, a
 // MARK: - Panel Base Style
 
 private func applyPanelStyle(_ view: NSVisualEffectView) {
-    view.material = .hudWindow
+    view.material = .popover
     view.blendingMode = .behindWindow
     view.state = .active
     view.wantsLayer = true
     view.layer?.cornerRadius = Panel.panelR
     view.layer?.masksToBounds = true
     view.layer?.borderWidth = 0.5
-    view.layer?.borderColor = NSColor.white.withAlphaComponent(0.15).cgColor
+    view.layer?.borderColor = NSColor.separatorColor.cgColor
 }
 
 // MARK: - Tool Panel (Single-Row Horizontal Bottom Bar)

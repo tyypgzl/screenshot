@@ -1176,6 +1176,7 @@ private extension SelectionOverlayView {
         tool.onDelete = { [weak self] in self?.deleteSelected() }
         tool.onColorChanged = { [weak self] color in self?.currentColor = color; self?.needsDisplay = true }
         tool.onLineWidthChanged = { [weak self] width in self?.lineWidth = width; self?.needsDisplay = true }
+        tool.setFrameSize(tool.fittingSize)
         addSubview(tool)
         self.toolPanel = tool
         tool.setSelectedTool(.select)
@@ -1185,6 +1186,7 @@ private extension SelectionOverlayView {
         action.onCopy = { [weak self] in self?.performCopy() }
         action.onSave = { [weak self] in self?.performSaveToDesktop() }
         action.onCancel = { [weak self] in self?.onCancel?() }
+        action.setFrameSize(action.fittingSize)
         addSubview(action)
         self.actionPanel = action
 
