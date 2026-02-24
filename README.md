@@ -2,6 +2,8 @@
 
 A lightweight, fast macOS menu bar app for capturing screenshots and annotating them — built with Swift, AppKit, and ScreenCaptureKit.
 
+Signed with Developer ID and notarized by Apple — no Gatekeeper warnings.
+
 ## Features
 
 - **Region Capture** — Select any area of your screen with a crosshair overlay
@@ -23,16 +25,17 @@ A lightweight, fast macOS menu bar app for capturing screenshots and annotating 
 
 ## Installation
 
-### Homebrew (coming soon)
+### Homebrew
 
 ```bash
+brew tap tyypgzl/tap
 brew install --cask screenshot
 ```
 
-### Manual
+### Manual Download
 
-1. Download the latest `.dmg` from [Releases](https://github.com/tyypgzl/screenshot/releases)
-2. Drag **Screenshot.app** to your Applications folder
+1. Download `Screenshot-v1.0.0-mac.zip` from the [latest release](https://github.com/tyypgzl/screenshot/releases/latest)
+2. Unzip and drag **Screenshot.app** to your Applications folder
 3. Launch from Applications — it will appear in your menu bar
 
 ## Usage
